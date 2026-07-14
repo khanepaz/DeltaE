@@ -1,0 +1,335 @@
+
+@font-face {
+    font-family: 'vazir';
+    src: url(../font/Vazir-Thin-FD-WOL.eot),
+    url(../font/Vazir-Thin-FD-WOL.ttf),
+    url(../font/Vazir-Thin-FD-WOL.woff),
+    url(../font/Vazir-Thin-FD-WOL.woff2);
+}
+ :root {
+     --primary-gradient: linear-gradient(135deg, #005c97, #363795);
+     --primary-color: #007bff;
+     --accent-green: #28a745;
+     --accent-yellow: #ffc107;
+     --bg-color: #f8f9fa;
+     --card-bg: #ffffff;
+     --text-color: #343a40;
+     --text-muted: #6c757d;
+     --border-color: #dee2e6;
+     --border-radius: 12px;
+     --shadow: 0 10px 25px rgba(0, 0, 0, 0.08), 0 5px 10px rgba(0, 0, 0, 0.05);
+ }
+
+ *,
+ *::before,
+ *::after {
+     box-sizing: border-box;
+ }
+
+ body {
+     font-family: 'vazir';
+     background-color: var(--bg-color);
+     color: var(--text-color);
+     margin: 0;
+     padding: 40px 20px;
+     line-height: 1.7;
+     -webkit-font-smoothing: antialiased;
+     -moz-osx-font-smoothing: grayscale;
+ }
+
+ .container {
+     max-width: 1200px;
+     margin: 0 auto;
+     background: var(--card-bg);
+     border-radius: var(--border-radius);
+     box-shadow: var(--shadow);
+     overflow: hidden;
+ }
+
+ .header {
+     background: var(--primary-gradient);
+     color: white;
+     padding: 30px 40px;
+     text-align: center;
+ }
+
+ .header h1 {
+     margin: 0;
+     font-size: 2.5rem;
+     font-weight: 700;
+     letter-spacing: -1px;
+ }
+
+ .main-content {
+     padding: 30px 40px;
+ }
+
+ .tab-buttons {
+     display: flex;
+     border-bottom: 1px solid var(--border-color);
+     margin-bottom: 20px;
+ }
+
+ .tab-button {
+     background: none;
+     border: none;
+     padding: 15px 25px;
+     cursor: pointer;
+     font-size: 18px;
+     font-weight: 500;
+     font-family: 'vazir';
+     color: var(--text-muted);
+     position: relative;
+     transition: color 0.3s ease;
+ }
+
+ .tab-button::after {
+     content: '';
+     position: absolute;
+     bottom: -1px;
+     left: 0;
+     width: 0;
+     height: 3px;
+     background-color: var(--primary-color);
+     transition: width 0.4s ease;
+ }
+
+ .tab-button:hover {
+     color: var(--text-color);
+ }
+
+ .tab-button.active {
+     color: var(--primary-color);
+ }
+
+ .tab-button.active::after {
+     width: 100%;
+ }
+
+ .tab-content {
+     display: none;
+     animation: fadeIn 0.5s ease;
+ }
+
+ .tab-content.active {
+     display: block;
+ }
+
+ @keyframes fadeIn {
+     from {
+         opacity: 0;
+         transform: translateY(10px);
+     }
+
+     to {
+         opacity: 1;
+         transform: translateY(0);
+     }
+ }
+
+ h2,
+ h3 {
+     color: var(--text-color);
+     border-bottom: 1px solid var(--border-color);
+     padding-bottom: 10px;
+     margin-bottom: 20px;
+ }
+
+ h3 {
+     font-size: 1.3em;
+     margin-top: 40px;
+ }
+
+ .card {
+     padding: 25px;
+     border: 1px solid var(--border-color);
+     border-radius: var(--border-radius);
+     background-color: #fdfdfd;
+     margin-bottom: 20px;
+ }
+
+ .manual-input-section {
+     display: flex;
+     flex-wrap: wrap;
+     gap: 15px;
+     justify-content: center;
+     margin-bottom: 20px;
+ }
+
+ .manual-input-section input {
+     padding: 12px 15px;
+     border: 1px solid var(--border-color);
+     border-radius: 8px;
+     font-family: 'vazir';
+     text-align: center;
+     transition: border-color 0.3s, box-shadow 0.3s;
+     flex-grow: 1;
+ }
+
+ .manual-input-section input:focus {
+     outline: none;
+     border-color: var(--primary-color);
+     box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.2);
+ }
+
+ .upload-section p {
+     text-align: center;
+     color: var(--text-muted);
+ }
+
+ .results-section {
+     display: none;
+     animation: fadeInSlideUp 0.6s ease-out;
+ }
+
+ @keyframes fadeInSlideUp {
+     from {
+         opacity: 0;
+         transform: translateY(20px);
+     }
+
+     to {
+         opacity: 1;
+         transform: translateY(0);
+     }
+ }
+
+ .colors-container {
+     display: grid;
+     grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+     gap: 20px;
+     margin-top: 20px;
+ }
+
+ .color-item {
+     text-align: center;
+     transition: transform 0.3s, box-shadow 0.3s;
+ }
+
+ .color-item:hover {
+     transform: translateY(-5px);
+     box-shadow: var(--shadow);
+ }
+
+ .color-swatch {
+     width: 100%;
+     height: 80px;
+     border-radius: 8px;
+     margin-bottom: 10px;
+     border: 1px solid var(--border-color);
+ }
+
+ .manual-samples-container {
+     margin-top: 20px;
+ }
+
+ @media print {
+     body {
+         background: white !important;
+     }
+
+     .container {
+         box-shadow: none !important;
+     }
+
+     .header,
+     .tab-buttons,
+     .card,
+     .manual-input-section,
+     .upload-section,
+     .results-section .btn {
+         display: none !important;
+     }
+
+     .results-section,
+     .colors-container,
+     .chart-section,
+     .manual-samples-container {
+         display: block !important;
+     }
+
+     .color-swatch {
+         background-color: inherit !important;
+         -webkit-print-color-adjust: exact !important;
+         print-color-adjust: exact !important;
+         background-image: linear-gradient(#fff, #fff);
+         /* بکاپ */
+     }
+
+     .colors-container {
+         display: grid !important;
+         grid-template-columns: repeat(6, minmax(100px, 1fr)) !important;
+         gap: 10px !important;
+         width: 100% !important;
+     }
+
+     .chart-section canvas {
+         max-width: 100% !important;
+         /* مطمئن بشیم canvas کامل نمایش داده می‌شه */
+         height: auto !important;
+         /* ارتفاع خودکار برای تطابق با محتوا */
+         -webkit-print-color-adjust: exact !important;
+         /* اعمال رنگ‌ها در چاپ */
+         print-color-adjust: exact !important;
+     }
+
+     .table,
+     .table th,
+     .table td {
+         border: 1px solid #000 !important;
+     }
+ }
+
+ @media (max-width: 768px) {
+     body {
+         padding: 20px 10px;
+     }
+
+     .main-content {
+         padding: 20px;
+     }
+
+     .header h1 {
+         font-size: 2rem;
+     }
+
+     .manual-input-section {
+         flex-direction: column;
+     }
+
+     .table-container {
+         -webkit-overflow-scrolling: touch;
+         /* اسکرول نرم‌تر در موبایل */
+     }
+
+     .table-container table {
+         font-size: 14px;
+         /* کاهش اندازه فونت در صفحات کوچک */
+     }
+ }
+
+ .table-container {
+     overflow-x: auto;
+     /* فعال کردن اسکرول افقی */
+     -webkit-overflow-scrolling: touch;
+     /* اسکرول نرم‌تر در موبایل */
+     margin-bottom: 20px;
+     /* فاصله از المنت‌های بعدی */
+     width: 100%;
+     /* عرض کامل ظرف */
+     display: block;
+     /* مطمئن شدن از رفتار بلاک */
+ }
+
+ .table-container table {
+     width: 100%;
+     /* عرض جدول به 100% ظرف تنظیم بشه */
+     min-width: 0;
+     /* اجازه می‌ده جدول کوچک‌تر از محتوا بشه */
+     table-layout: auto;
+     /* تنظیم خودکار عرض ستون‌ها */
+     border-collapse: collapse;
+     /* جلوگیری از فاصله‌های اضافی */
+     white-space: nowrap;
+     /* جلوگیری از شکستن متن */
+ }
