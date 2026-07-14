@@ -1,0 +1,26 @@
+{
+    "name": "آزمایشگاه جامع تحلیل رنگ",
+    "short_name": "تحلیل رنگ",
+    "description": "ابزاری برای تحلیل و مقایسه رنگ‌ها در فضاهای رنگی CIELAB و RGB",
+    "lang": "fa-IR",
+    "dir": "rtl",
+    "start_url": ".",
+    "display": "standalone",
+    "background_color": "#f8f9fa",
+    "theme_color": "#343a40",
+    "icons": [
+      {
+        "src": "icon-192.png",
+        "type": "image/png",
+        "sizes": "192x192",
+        "purpose": "any maskable"
+      },
+      {
+        "src": "icon-512.png",
+        "type": "image/png",
+        "sizes": "512x512",
+        "purpose": "any maskable"
+      }
+    ]
+
+  }

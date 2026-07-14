@@ -1,0 +1,1016 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>آزمایشگاه جامع تحلیل رنگ</title>
+
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css" rel="stylesheet">
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js "></script>
+    <meta name="theme-color" content="#343a40"/>
+    <link rel="manifest" href="manifest.json">
+</head>
+
+<body>
+    <div class="container">
+        <header class="header">
+            <div class="d-flex justify-content-between align-items-center">
+                <h1><i class="fas fa-palette"></i> <span id="pageTitle">آزمایشگاه جامع تحلیل رنگ</span></h1>
+                <button id="langToggle" class="btn btn-secondary">English</button>
+            </div>
+        </header>
+
+        <div class="card mb-3">
+            <div class="card-body text-center">
+                <h5 class="card-title mb-3"><i class="fas fa-stream"></i> <span id="inputMethodTitle">روش ورود داده‌ها</span></h5>
+                <div class="btn-group" role="group" aria-label="Input Method">
+                    <button type="button" id="methodManualBtn" class="btn btn-outline-primary active" onclick="switchInputMethod('manual')">ورود دستی</button>
+           
+                    <button type="button" id="methodCameraBtn" class="btn btn-outline-primary" onclick="switchInputMethod('camera')">اسکن با دوربین</button>
+                             <button type="button" id="methodExcelBtn" class="btn btn-outline-primary" onclick="switchInputMethod('excel')">فایل اکسل</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="cameraScannerSection" class="card mb-3" style="display: none;">
+            <div class="card-body text-center">
+                <h3><i class="fas fa-camera"></i> <span id="cameraSectionTitle">تشخیص زنده رنگ</span></h3>
+                <div class="position-relative d-inline-block" style="max-width: 100%; width: 400px;">
+                    <video id="webcamVideo" autoplay playsinline style="width: 100%; border-radius: 8px; background: #000;"></video>
+                    <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 20px; height: 20px; border: 2px solid #fff; border-radius: 50%; box-shadow: 0 0 4px rgba(0,0,0,0.5); pointer-events: none; z-index: 10;"></div>
+                </div>
+                <div class="mt-2">
+                    <div class="d-inline-block p-2 rounded border" style="min-width: 150px;">
+                        <div id="liveColorPreview" style="width: 100%; height: 30px; border-radius: 4px; margin-bottom: 5px; border: 1px solid #ccc;"></div>
+                        <span id="liveColorValues" class="fw-bold">---</span>
+                    </div>
+                </div>
+                <div class="mt-3">
+                    <button id="captureColorBtn" class="btn btn-info"><i class="fas fa-crosshairs"></i> درج رنگ اسکن شده</button>
+                    <button id="stopCameraBtn" class="btn btn-secondary ms-2">توقف دوربین</button>
+                </div>
+            </div>
+        </div>
+
+        <main class="main-content">
+            <div class="tab-buttons">
+                <button class="tab-button active" onclick="openTab(event, 'lab-tab')" id="labTabBtn">CIELAB</button>
+                <button class="tab-button" onclick="openTab(event, 'rgb-tab')" id="rgbTabBtn">RGB</button>
+            </div>
+
+            <div id="lab-tab" class="tab-content active">
+                <div class="card">
+                    <h3><i class="fas fa-pencil-alt"></i> <span id="manualInputLab">ورود دستی نمونه‌ها</span></h3>
+                    <div class="manual-input-section row">
+                        <input class="col-lg-2" type="text" id="manualNameLab" placeholder="نام نمونه">
+                        <input class="col-lg-2" type="number" step="any" id="manualLLab" placeholder="L* (0-100)">
+                        <input class="col-lg-2" type="number" step="any" id="manualALab" placeholder="a* (-128 تا 127)">
+                        <input class="col-lg-2" type="number" step="any" id="manualBLab" placeholder="b* (-128 تا 127)">
+                    </div>
+                    <div class="text-center">
+                        <button id="addSampleBtnLab" class="btn btn-success">افزودن نمونه</button>
+                        <button id="resetBtnLab" class="btn btn-danger ms-2">ریست</button>
+                    </div>
+                    <div class="table-container">
+                        <table id="manualSampleTableLab" class="table table-bordered table-striped mt-3">
+                            <thead>
+                                <tr>
+                                    <th id="tableNameLab">نام نمونه</th>
+                                    <th>L*</th>
+                                    <th>a*</th>
+                                    <th>b*</th>
+                                    <th id="tableActionsLab">عملیات</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                    <div class="text-center mt-3">
+                        <button id="compareManualBtnLab" class="btn btn-warning" disabled>مقایسه نمونه‌های دستی</button>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3><i class="fas fa-file-excel"></i> <span id="uploadExcelLab">بارگزاری از فایل اکسل</span></h3>
+                    <div class="upload-section">
+                        <p id="excelFormatLab">فرمت اکسل: ستون اول : نام نمونه / ستون دوم تا چهارم : مقادیر L*a*b*</p>
+                        <input type="file" id="excelFileLab" accept=".xlsx, .xls" class="form-control mb-2">
+                        <button id="compareBtnLab" class="btn btn-primary" disabled>مقایسه از فایل</button>
+                    </div>
+                </div>
+
+                <div id="resultsLab" class="results-section">
+                    <h2><i class="fas fa-calculator"></i> <span id="resultsTitleLab">نتایج تحلیل</span></h2>
+                    <div class="table-container">
+                        <div id="manualSamplesContainerLab" class="manual-samples-container"></div>
+                    </div>
+                    <h3 id="matrixTitleLab">ماتریکس اختلاف رنگ (ΔE₀₀)</h3>
+                    <div id="matrixContainerLab"></div>
+                    <h3 id="colorsTitleLab">نمایش بصری رنگ‌ها</h3>
+                    <div id="colorsContainerLab" class="colors-container"></div>
+                    <div class="text-center mb-3">
+                        <button id="showChartBtnLab" class="btn btn-success" disabled><i class="fas fa-chart-line"></i> <span id="showChartLab">نمایش نمودار</span></button>
+                    </div>
+                    <div id="chartSectionLab" class="chart-section">
+                        <h3 id="chartTitleLab">نمودار اختلاف فام نسبت به نمونه مرجع</h3>
+                        <canvas id="deltaEChartLab"></canvas>
+                    </div>
+                    <div class="text-center mb-3">
+                        <button id="printBtnLab" class="btn btn-primary ms-2" disabled><i class="fas fa-print"></i> <span id="printLab">چاپ</span></button>
+                        <button id="exportExcelBtnLab" class="btn btn-primary ms-2" disabled><i class="fas fa-file-excel"></i> <span id="exportExcelLab">خروجی اکسل</span></button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="rgb-tab" class="tab-content">
+                <div class="card">
+                    <h3><i class="fas fa-pencil-alt"></i> <span id="manualInputRgb">ورود دستی نمونه‌ها</span></h3>
+                    <div class="manual-input-section">
+                        <input type="text" id="manualNameRgb" placeholder="نام نمونه">
+                        <input type="number" min="0" max="255" id="manualRRgb" placeholder="R (0-255)">
+                        <input type="number" min="0" max="255" id="manualGRgb" placeholder="G (0-255)">
+                        <input type="number" min="0" max="255" id="manualBRgb" placeholder="B (0-255)">
+                    </div>
+                    <div class="text-center">
+                        <button id="addSampleBtnRgb" class="btn btn-success">افزودن نمونه</button>
+                        <button id="resetBtnRgb" class="btn btn-danger ms-2">ریست</button>
+                    </div>
+                    <div class="table-container">
+                        <table id="manualSampleTableRgb" class="table table-bordered table-striped mt-3">
+                            <thead>
+                                <tr>
+                                    <th id="tableNameRgb">نام نمونه</th>
+                                    <th>R</th>
+                                    <th>G</th>
+                                    <th>B</th>
+                                    <th id="tableActionsRgb">عملیات</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                    <div class="text-center mt-3">
+                        <button id="compareManualBtnRgb" class="btn btn-warning" disabled>مقایسه نمونه‌های دستی</button>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3><i class="fas fa-file-excel"></i> <span id="uploadExcelRgb">بارگزاری از فایل اکسل</span></h3>
+                    <div class="upload-section">
+                        <p id="excelFormatRgb">فرمت اکسل: ستون اول نام نمونه / ستون دوم تا چهارم مقادیر RGB</p>
+                        <input type="file" id="excelFileRgb" accept=".xlsx, .xls" class="form-control mb-2">
+                        <button id="compareBtnRgb" class="btn btn-primary" disabled>مقایسه از فایل</button>
+                    </div>
+                </div>
+
+                <div id="resultsRgb" class="results-section">
+                    <h2><i class="fas fa-calculator"></i> <span id="resultsTitleRgb">نتایج تحلیل</span></h2>
+                    <div class="table-container">
+                        <div id="manualSamplesContainerRgb" class="manual-samples-container"></div>
+                    </div>
+                    <h3 id="matrixTitleRgb">ماتریکس اختلاف رنگ (ΔE₀₀)</h3>
+                    <div id="matrixContainerRgb"></div>
+                    <h3 id="colorsTitleRgb">نمایش بصری رنگ‌ها</h3>
+                    <div id="colorsContainerRgb" class="colors-container"></div>
+                    <div class="text-center mb-3 mt-3">
+                        <button id="showChartBtnRgb" class="btn btn-success" disabled><i class="fas fa-chart-line"></i> <span id="showChartRgb">نمایش نمودار</span></button>
+                    </div>
+                    <div id="chartSectionRgb" class="chart-section">
+                        <h3 id="chartTitleRgb">نمودار اختلاف فام نسبت به نمونه مرجع</h3>
+                        <canvas id="deltaEChartRgb"></canvas>
+                    </div>
+                    <div class="text-center mb-3">
+                        <button id="printBtnRgb" class="btn btn-primary ms-2" disabled><i class="fas fa-print"></i> <span id="printRgb">چاپ</span></button>
+                        <button id="exportExcelBtnRgb" class="btn btn-primary ms-2" disabled><i class="fas fa-file-excel"></i> <span id="exportExcelRgb">خروجی اکسل</span></button>
+                    </div>
+                </div>
+            </div>
+        </main>
+        <div>
+            <p id="footerCredit">طراحی و تنظیم : حامد خانه پز</p>
+        </div>
+    </div>
+
+    <script>
+        // Language translations
+        const translations = {
+            fa: {
+                printBackgroundTip: "لطفاً در تنظیمات چاپ، گزینه 'چاپ پس‌زمینه‌ها' (Background Graphics) را فعال کنید تا رنگ‌ها به‌درستی نمایش داده شوند.",
+                footerCredit: "طراحی و تنظیم : حامد خانه پز",
+                pageTitle: "آزمایشگاه جامع تحلیل رنگ",
+                labTab: "CIELAB",
+                rgbTab: "RGB",
+                manualInputLab: "ورود دستی نمونه‌ها",
+                manualInputRgb: "ورود دستی نمونه‌ها",
+                addSample: "افزودن نمونه",
+                updateSample: "به‌روزرسانی نمونه",
+                reset: "ریست",
+                compareManual: "مقایسه نمونه‌های دستی",
+                uploadExcelLab: "بارگزاری از فایل اکسل",
+                uploadExcelRgb: "بارگزاری از فایل اکسل",
+                excelFormatLab: "فرمت اکسل: ستون A: نام | B: مقدار L* | C: مقدار a* | D: مقدار b*",
+                excelFormatRgb: "فرمت اکسل: ستون A: نام | B: مقدار R | C: مقدار G | D: مقدار B",
+                compareFile: "مقایسه از فایل",
+                resultsTitle: "نتایج تحلیل",
+                matrixTitle: "ماتریکس اختلاف رنگ (ΔE₀₀)",
+                colorsTitle: "نمایش بصری رنگ‌ها",
+                showChart: "نمایش نمودار",
+                print: "چاپ",
+                exportExcel: "خروجی اکسل",
+                chartTitle: "نمودار اختلاف فام نسبت به نمونه مرجع",
+                tableName: "نام نمونه",
+                tableActions: "عملیات",
+                manualSamplesTitle: "لیست نمونه‌های واردشده",
+                edit: "ویرایش",
+                delete: "حذف",
+                namePlaceholderLab: "نام نمونه",
+                lPlaceholder: "L* (0-100)",
+                aPlaceholder: "a* (-128 تا 127)",
+                bPlaceholder: "b* (-128 تا 127)",
+                namePlaceholderRgb: "نام نمونه",
+                rPlaceholder: "R (0-255)",
+                gPlaceholder: "G (0-255)",
+                bPlaceholderRgb: "B (0-255)",
+                invalidInput: "لطفاً تمام مقادیر را به درستی وارد کنید.\n",
+                invalidLab: "مقادیر L* باید بین 0 تا 100 و a*, b* باید بین -128 تا 127 باشند.",
+                invalidRgb: "مقادیر R, G, B باید اعداد صحیح بین 0 تا 255 باشند.",
+                noData: "داده‌ای برای چاپ یا خروجی گرفتن وجود ندارد.",
+                invalidExcelData: "برخی ردیف‌ها در فایل اکسل نامعتبر هستند و نادیده گرفته شدند.\nلطفاً فرمت و مقادیر را بررسی کنید.",
+                noValidSamples: "هیچ نمونه معتبری در فایل اکسل یافت نشد.\nلطفاً فایل را بررسی کنید.",
+                inputMethodTitle: "روش ورود داده‌ها",
+                cameraSectionTitle: "تشخیص زنده رنگ"
+            },
+            en: {
+                printBackgroundTip: "Please enable the 'Background Graphics' option in print settings to ensure colors are displayed correctly.",
+                footerCredit: "Designed and Developed by: Hamed Khanepaz",
+                pageTitle: "Comprehensive Color Analysis Laboratory",
+                labTab: "CIELAB",
+                rgbTab: "RGB",
+                manualInputLab: "Manual Sample Input",
+                manualInputRgb: "Manual Sample Input",
+                addSample: "Add Sample",
+                updateSample: "Update Sample",
+                reset: "Reset",
+                compareManual: "Compare Manual Samples",
+                uploadExcelLab: "Upload from Excel File",
+                uploadExcelRgb: "Upload from Excel File",
+                excelFormatLab: "Excel format: Column A: Name | B: L* value | C: a* value | D: b* value",
+                excelFormatRgb: "Excel format: Column A: Name | B: R value | C: G value | D: B value",
+                compareFile: "Compare from File",
+                resultsTitle: "Analysis Results",
+                matrixTitle: "Color Difference Matrix (ΔE₀₀)",
+                colorsTitle: "Visual Color Display",
+                showChart: "Show Chart",
+                print: "Print",
+                exportExcel: "Export Excel",
+                chartTitle: "Hue Difference Chart Relative to Reference Sample",
+                tableName: "Sample Name",
+                tableActions: "Actions",
+                manualSamplesTitle: "List of Entered Samples",
+                edit: "Delete",
+                delete: "Delete",
+                namePlaceholderLab: "Sample Name",
+                lPlaceholder: "L* (0-100)",
+                aPlaceholder: "a* (-128 to 127)",
+                bPlaceholder: "b* (-128 to 127)",
+                namePlaceholderRgb: "Sample Name",
+                rPlaceholder: "R (0-255)",
+                gPlaceholder: "G (0-255)",
+                bPlaceholderRgb: "B (0-255)",
+                invalidInput: "Please enter all values correctly.\n",
+                invalidLab: "L* must be between 0 and 100, and a*, b* must be between -128 and 127.",
+                invalidRgb: "R, G, B values must be integers between 0 and 255.",
+                noData: "No data available for printing or exporting.",
+                invalidExcelData: "Some rows in the Excel file are invalid and were ignored.\nPlease check the format and values.",
+                noValidSamples: "No valid samples found in the Excel file.\nPlease check the file.",
+                inputMethodTitle: "Data Input Method",
+                cameraSectionTitle: "Live Color Detection"
+            }
+        };
+
+        let currentLang = 'fa';
+
+        function switchLanguage(lang) {
+            currentLang = lang;
+
+            document.getElementById('pageTitle').textContent = translations[lang].pageTitle;
+            document.getElementById('labTabBtn').textContent = translations[lang].labTab;
+            document.getElementById('rgbTabBtn').textContent = translations[lang].rgbTab;
+            document.getElementById('footerCredit').textContent = translations[lang].footerCredit;
+            document.getElementById('manualInputLab').textContent = translations[lang].manualInputLab;
+            document.getElementById('manualInputRgb').textContent = translations[lang].manualInputRgb;
+            document.getElementById('addSampleBtnLab').textContent = translations[lang].addSample;
+            document.getElementById('addSampleBtnRgb').textContent = translations[lang].addSample;
+            document.getElementById('resetBtnLab').textContent = translations[lang].reset;
+            document.getElementById('resetBtnRgb').textContent = translations[lang].reset;
+            document.getElementById('compareManualBtnLab').textContent = translations[lang].compareManual;
+            document.getElementById('compareManualBtnRgb').textContent = translations[lang].compareManual;
+            document.getElementById('uploadExcelLab').textContent = translations[lang].uploadExcelLab;
+            document.getElementById('uploadExcelRgb').textContent = translations[lang].uploadExcelRgb;
+            document.getElementById('excelFormatLab').textContent = translations[lang].excelFormatLab;
+            document.getElementById('excelFormatRgb').textContent = translations[lang].excelFormatRgb;
+            document.getElementById('compareBtnLab').textContent = translations[lang].compareFile;
+            document.getElementById('compareBtnRgb').textContent = translations[lang].compareFile;
+            document.getElementById('resultsTitleLab').textContent = translations[lang].resultsTitle;
+            document.getElementById('resultsTitleRgb').textContent = translations[lang].resultsTitle;
+            document.getElementById('matrixTitleLab').textContent = translations[lang].matrixTitle;
+            document.getElementById('matrixTitleRgb').textContent = translations[lang].matrixTitle;
+            document.getElementById('colorsTitleLab').textContent = translations[lang].colorsTitle;
+            document.getElementById('colorsTitleRgb').textContent = translations[lang].colorsTitle;
+            document.getElementById('showChartBtnLab').querySelector('span').textContent = translations[lang].showChart;
+            document.getElementById('showChartBtnRgb').querySelector('span').textContent = translations[lang].showChart;
+            document.getElementById('printBtnLab').querySelector('span').textContent = translations[lang].print;
+            document.getElementById('printBtnRgb').querySelector('span').textContent = translations[lang].print;
+            document.getElementById('exportExcelBtnLab').querySelector('span').textContent = translations[lang].exportExcel;
+            document.getElementById('exportExcelBtnRgb').querySelector('span').textContent = translations[lang].exportExcel;
+            document.getElementById('chartTitleLab').textContent = translations[lang].chartTitle;
+            document.getElementById('chartTitleRgb').textContent = translations[lang].chartTitle;
+            document.getElementById('tableNameLab').textContent = translations[lang].tableName;
+            document.getElementById('tableNameRgb').textContent = translations[lang].tableName;
+            document.getElementById('tableActionsLab').textContent = translations[lang].tableActions;
+            document.getElementById('tableActionsRgb').textContent = translations[lang].tableActions;
+            document.getElementById('manualNameLab').placeholder = translations[lang].namePlaceholderLab;
+            document.getElementById('manualLLab').placeholder = translations[lang].lPlaceholder;
+            document.getElementById('manualALab').placeholder = translations[lang].aPlaceholder;
+            document.getElementById('manualBLab').placeholder = translations[lang].bPlaceholder;
+            document.getElementById('manualNameRgb').placeholder = translations[lang].namePlaceholderRgb;
+            document.getElementById('manualRRgb').placeholder = translations[lang].rPlaceholder;
+            document.getElementById('manualGRgb').placeholder = translations[lang].gPlaceholder;
+            document.getElementById('manualBRgb').placeholder = translations[lang].bPlaceholderRgb;
+            
+            if(document.getElementById('inputMethodTitle')) document.getElementById('inputMethodTitle').textContent = translations[lang].inputMethodTitle;
+            if(document.getElementById('cameraSectionTitle')) document.getElementById('cameraSectionTitle').textContent = translations[lang].cameraSectionTitle;
+
+            document.querySelectorAll('#manualSampleTableLab tbody tr').forEach(row => {
+                row.querySelector('.edit-btn').textContent = translations[lang].edit;
+                row.querySelector('.delete-btn').textContent = translations[lang].delete;
+            });
+            document.querySelectorAll('#manualSampleTableRgb tbody tr').forEach(row => {
+                row.querySelector('.edit-btn').textContent = translations[lang].edit;
+                row.querySelector('.delete-btn').textContent = translations[lang].delete;
+            });
+            document.querySelectorAll('#manualSamplesContainerLab h3').forEach(h3 => {
+                h3.textContent = translations[lang].manualSamplesTitle;
+            });
+            document.querySelectorAll('#manualSamplesContainerRgb h3').forEach(h3 => {
+                h3.textContent = translations[lang].manualSamplesTitle;
+            });
+
+            if (myLabChart && labChartData) {
+                myLabChart.destroy();
+                myLabChart = renderChart(labChartData, document.getElementById('deltaEChartLab'));
+            }
+            if (myRgbChart && rgbChartData) {
+                myRgbChart.destroy();
+                myRgbChart = renderChart(rgbChartData, document.getElementById('deltaEChartRgb'));
+            }
+
+            document.getElementById('langToggle').textContent = lang === 'fa' ? 'English' : 'فارسی';
+            document.documentElement.lang = lang;
+            document.documentElement.dir = lang === 'fa' ? 'rtl' : 'ltr';
+        }
+
+        let labChartData = null, rgbChartData = null;
+        let myLabChart = null, myRgbChart = null;
+        let labSamples = [], rgbSamples = [];
+
+        function openTab(evt, tabName) {
+            document.querySelectorAll(".tab-content").forEach(tc => tc.classList.remove("active"));
+            document.querySelectorAll(".tab-button").forEach(tb => tb.classList.remove("active"));
+            document.getElementById(tabName).classList.add("active");
+            evt.currentTarget.classList.add("active");
+
+            if(videoStream && cameraInterval) {
+                processCameraFrame(); 
+            }
+        }
+
+        function generateManualSamplesTable(samples, container, type, isManualInput) {
+            if (!isManualInput) {
+                container.innerHTML = '';
+                return;
+            }
+            let tableHTML = `<h3>${translations[currentLang].manualSamplesTitle}</h3>`;
+            tableHTML += '<table class="table table-bordered table-striped text-center"><thead><tr>';
+            if (type === 'Lab') {
+                tableHTML += `<th>${translations[currentLang].tableName}</th><th>L*</th><th>a*</th><th>b*</th>`;
+            } else {
+                tableHTML += `<th>${translations[currentLang].tableName}</th><th>R</th><th>G</th><th>B</th>`;
+            }
+            tableHTML += '</tr></thead><tbody>';
+            samples.forEach(sample => {
+                tableHTML += '<tr>';
+                if (type === 'Lab') {
+                    tableHTML += `
+                        <td>${sample.name}</td>
+                        <td>${sample.lab.l.toFixed(2)}</td>
+                        <td>${sample.lab.a.toFixed(2)}</td>
+                        <td>${sample.lab.b.toFixed(2)}</td>
+                    `;
+                } else {
+                    const rgb = culori.converter('rgb')(sample.lab);
+                    tableHTML += `
+                        <td>${sample.name}</td>
+                        <td>${Math.round(rgb.r * 255)}</td>
+                        <td>${Math.round(rgb.g * 255)}</td>
+                        <td>${Math.round(rgb.b * 255)}</td>
+                    `;
+                }
+                tableHTML += '</tr>';
+            });
+            container.innerHTML = tableHTML + '</tbody></table>';
+        }
+
+        function setupAnalyzer(type) {
+            const elements = {
+                fileInput: document.getElementById(`excelFile${type}`),
+                compareBtn: document.getElementById(`compareBtn${type}`),
+                showChartBtn: document.getElementById(`showChartBtn${type}`),
+                printBtn: document.getElementById(`printBtn${type}`),
+                exportExcelBtn: document.getElementById(`exportExcelBtn${type}`),
+                resultsDiv: document.getElementById(`results${type}`),
+                matrixContainer: document.getElementById(`matrixContainer${type}`),
+                colorsContainer: document.getElementById(`colorsContainer${type}`),
+                chartSection: document.getElementById(`chartSection${type}`),
+                chartCanvas: document.getElementById(`deltaEChart${type}`),
+                manualName: document.getElementById(`manualName${type}`),
+                manualInputs: (type === 'Lab') ? ['manualLLab', 'manualALab', 'manualBLab'] : ['manualRRgb', 'manualGRgb', 'manualBRgb'],
+                addSampleBtn: document.getElementById(`addSampleBtn${type}`),
+                resetBtn: document.getElementById(`resetBtn${type}`),
+                manualSampleTable: document.getElementById(`manualSampleTable${type}`),
+                compareManualBtn: document.getElementById(`compareManualBtn${type}`),
+                manualSamplesContainer: document.getElementById(`manualSamplesContainer${type}`)
+            };
+            let manualSamples = [];
+            let editingIndex = null;
+            let isManualInput = false;
+
+            elements.fileInput.addEventListener('change', () => {
+                if (elements.fileInput.files.length > 0) elements.compareBtn.disabled = false;
+                resetResults();
+            });
+            elements.compareBtn.addEventListener('click', () => {
+                isManualInput = false;
+                handleFileProcessing(elements.fileInput, type);
+            });
+            elements.addSampleBtn.addEventListener('click', () => {
+                const name = elements.manualName.value.trim();
+                const values = elements.manualInputs.map(id => parseFloat(document.getElementById(id).value));
+
+                if (!name || values.some(isNaN)) {
+                    alert(translations[currentLang].invalidInput);
+                    return;
+                }
+
+                if (type === 'Lab') {
+                    if (values[0] < 0 || values[0] > 100 || values[1] < -128 || values[1] > 127 || values[2] < -128 || values[2] > 127) {
+                        alert(translations[currentLang].invalidInput + translations[currentLang].invalidLab);
+                        return;
+                    }
+                } else {
+                    if (values.some(v => v < 0 || v > 255 || !Number.isInteger(v))) {
+                        alert(translations[currentLang].invalidInput + translations[currentLang].invalidRgb);
+                        return;
+                    }
+                }
+
+                let newSample;
+                if (type === 'Lab') {
+                    newSample = { name, lab: { l: values[0], a: values[1], b: values[2], mode: 'lab' } };
+                } else {
+                    const converter = culori.converter('lab');
+                    newSample = { name, lab: converter({ mode: 'rgb', r: values[0] / 255, g: values[1] / 255, b: values[2] / 255 }) };
+                }
+
+                if (editingIndex !== null) {
+                    manualSamples[editingIndex] = newSample;
+                    editingIndex = null;
+                    elements.addSampleBtn.textContent = translations[currentLang].addSample;
+                } else {
+                    manualSamples.push(newSample);
+                }
+
+                updateSampleTable();
+                if (manualSamples.length >= 2) elements.compareManualBtn.disabled = false;
+
+                elements.manualName.value = '';
+                elements.manualInputs.forEach(id => document.getElementById(id).value = '');
+                elements.manualName.focus();
+            });
+            elements.manualSampleTable.addEventListener('click', (e) => {
+                const index = e.target.closest('tr')?.dataset.index;
+                if (!index) return;
+
+                if (e.target.classList.contains('edit-btn')) {
+                    editingIndex = parseInt(index);
+                    const sample = manualSamples[editingIndex];
+                    elements.manualName.value = sample.name;
+                    if (type === 'Lab') {
+                        elements.manualInputs.forEach((id, i) => document.getElementById(id).value = sample.lab[['l', 'a', 'b'][i]]);
+                    } else {
+                        const rgb = culori.converter('rgb')(sample.lab);
+                        elements.manualInputs.forEach((id, i) => document.getElementById(id).value = Math.round(rgb[['r', 'g', 'b'][i]] * 255));
+                    }
+                    elements.addSampleBtn.textContent = translations[currentLang].updateSample;
+                    elements.manualName.focus();
+                } else if (e.target.classList.contains('delete-btn')) {
+                    manualSamples.splice(index, 1);
+                    updateSampleTable();
+                    if (manualSamples.length < 2) elements.compareManualBtn.disabled = true;
+                }
+            });
+            elements.compareManualBtn.addEventListener('click', () => {
+                isManualInput = true;
+                if (type === 'Lab') labSamples = [...manualSamples];
+                else rgbSamples = [...manualSamples];
+                runAnalysis(manualSamples, type, isManualInput);
+            });
+            elements.showChartBtn.addEventListener('click', () => {
+                let chartData = (type === 'Lab') ? labChartData : rgbChartData;
+                let chartInstance = (type === 'Lab') ? myLabChart : myRgbChart;
+                if (chartData) {
+                    elements.chartSection.style.display = 'block';
+                    elements.chartSection.classList.add('fade-in');
+                    if (chartInstance) chartInstance.destroy();
+                    const newChartInstance = renderChart(chartData, elements.chartCanvas);
+                    if (type === 'Lab') myLabChart = newChartInstance;
+                    else myRgbChart = newChartInstance;
+                    elements.chartSection.scrollIntoView({ behavior: 'smooth' });
+                    elements.printBtn.disabled = false;
+                    elements.exportExcelBtn.disabled = false;
+                }
+            });
+
+            elements.resetBtn.addEventListener('click', () => {
+                manualSamples = [];
+                if (type === 'Lab') labSamples = [];
+                else rgbSamples = [];
+                updateSampleTable();
+                elements.compareManualBtn.disabled = true;
+                elements.showChartBtn.disabled = true;
+                elements.printBtn.disabled = true;
+                elements.exportExcelBtn.disabled = true;
+                elements.resultsDiv.style.display = 'none';
+                elements.chartSection.style.display = 'none';
+                elements.manualSamplesContainer.innerHTML = '';
+                elements.manualName.value = '';
+                elements.manualInputs.forEach(id => document.getElementById(id).value = '');
+                elements.fileInput.value = '';
+                elements.compareBtn.disabled = true;
+                if (type === 'Lab' && myLabChart) myLabChart.destroy();
+                if (type === 'Rgb' && myRgbChart) myRgbChart.destroy();
+            });
+
+            elements.printBtn.addEventListener('click', () => {
+                if (!labChartData && !rgbChartData) {
+                    alert(translations[currentLang].noData);
+                    return;
+                }
+                const colorsContainer = document.getElementById(`colorsContainer${type}`);
+                if (colorsContainer) {
+                    colorsContainer.querySelectorAll('.color-swatch').forEach(swatch => {
+                        const parent = swatch.parentElement;
+                        if (parent && parent.querySelector('span')) {
+                            const sampleName = parent.querySelector('span').textContent;
+                            const sample = (type === 'Lab' ? labSamples : rgbSamples).find(s => s.name === sampleName);
+                            if (sample) {
+                                swatch.style.backgroundColor = culori.formatRgb(sample.lab);
+                                swatch.style.backgroundImage = `linear-gradient(${culori.formatRgb(sample.lab)}, ${culori.formatRgb(sample.lab)})`;
+                            }
+                        }
+                    });
+                }
+                alert(translations[currentLang].printBackgroundTip || "لطفاً در تنظیمات چاپ، گزینه 'چاپ پس‌زمینه‌ها' (Background Graphics) را فعال کنید تا رنگ‌ها به‌درستی نمایش داده شوند.");
+                window.print();
+            });
+
+            elements.exportExcelBtn.addEventListener('click', () => {
+                console.log(`Exporting Excel for ${type}`);
+                let chartData = (type === 'Lab') ? labChartData : rgbChartData;
+                let samples = (type === 'Lab') ? labSamples : rgbSamples;
+
+                if (!chartData || !samples || samples.length < 2) {
+                    console.warn('No valid data for Excel export:', { chartData, samples });
+                    alert(translations[currentLang].noData);
+                    return;
+                }
+
+                try {
+                    const matrixData = [];
+                    matrixData.push([''].concat(samples.map(s => s.name)));
+                    samples.forEach((s1, i) => {
+                        const row = [s1.name];
+                        samples.forEach((s2, j) => {
+                            if (i === j) {
+                                row.push(0);
+                            } else {
+                                const deltaE = culori.differenceCiede2000()(s1.lab, s2.lab);
+                                row.push(Number(deltaE).toFixed(2));
+                            }
+                        });
+                        matrixData.push(row);
+                    });
+
+                    const chartSheetData = chartData.labels.map((label, i) => ({
+                        [translations[currentLang].tableName]: label,
+                        'ΔE₀₀': Number(chartData.data[i]).toFixed(2)
+                    }));
+
+                    const sampleSheetData = samples.map(sample => {
+                        if (type === 'Lab') {
+                            return {
+                                [translations[currentLang].tableName]: sample.name,
+                                'L*': Number(sample.lab.l).toFixed(2),
+                                'a*': Number(sample.lab.a).toFixed(2),
+                                'b*': Number(sample.lab.b).toFixed(2)
+                            };
+                        } else {
+                            const rgb = culori.converter('rgb')(sample.lab);
+                            return {
+                                [translations[currentLang].tableName]: sample.name,
+                                'R': Math.round(rgb.r * 255),
+                                'G': Math.round(rgb.g * 255),
+                                'B': Math.round(rgb.b * 255)
+                            };
+                        }
+                    });
+
+                    const wb = XLSX.utils.book_new();
+                    const matrixSheet = XLSX.utils.aoa_to_sheet(matrixData);
+                    const chartSheet = XLSX.utils.json_to_sheet(chartSheetData);
+                    const sampleSheet = XLSX.utils.json_to_sheet(sampleSheetData);
+                    XLSX.utils.book_append_sheet(wb, matrixSheet, currentLang === 'fa' ? 'ماتریکس اختلاف رنگ' : 'Color Difference Matrix');
+                    XLSX.utils.book_append_sheet(wb, chartSheet, currentLang === 'fa' ? 'داده‌های نمودار' : 'Chart Data');
+                    XLSX.utils.book_append_sheet(wb, sampleSheet, currentLang === 'fa' ? 'داده‌های نمونه' : 'Sample Data');
+                    XLSX.writeFile(wb, `color_analysis_${type.toLowerCase()}.xlsx`);
+                } catch (error) {
+                    console.error('Error generating Excel:', error);
+                    alert(translations[currentLang].noData);
+                }
+            });
+
+            function updateSampleTable() {
+                const tbody = elements.manualSampleTable.querySelector('tbody');
+                tbody.innerHTML = '';
+                manualSamples.forEach((sample, index) => {
+                    const row = document.createElement('tr');
+                    row.dataset.index = index;
+                    if (type === 'Lab') {
+                        row.innerHTML = `
+                            <td>${sample.name}</td>
+                            <td>${sample.lab.l.toFixed(2)}</td>
+                            <td>${sample.lab.a.toFixed(2)}</td>
+                            <td>${sample.lab.b.toFixed(2)}</td>
+                            <td>
+                                <button class="btn btn-sm btn-primary edit-btn">${translations[currentLang].edit}</button>
+                                <button class="btn btn-sm btn-danger delete-btn">${translations[currentLang].delete}</button>
+                            </td>
+                        `;
+                    } else {
+                        const rgb = culori.converter('rgb')(sample.lab);
+                        row.innerHTML = `
+                            <td>${sample.name}</td>
+                            <td>${Math.round(rgb.r * 255)}</td>
+                            <td>${Math.round(rgb.g * 255)}</td>
+                            <td>${Math.round(rgb.b * 255)}</td>
+                            <td>
+                                <button class="btn btn-sm btn-primary edit-btn">${translations[currentLang].edit}</button>
+                                <button class="btn btn-sm btn-danger delete-btn">${translations[currentLang].delete}</button>
+                            </td>
+                        `;
+                    }
+                    tbody.appendChild(row);
+                });
+            }
+
+            function resetResults() {
+                elements.resultsDiv.style.display = 'none';
+                elements.chartSection.style.display = 'none';
+                elements.manualSamplesContainer.innerHTML = '';
+                elements.showChartBtn.disabled = true;
+                elements.printBtn.disabled = true;
+                elements.exportExcelBtn.disabled = true;
+            }
+        }
+
+        function handleFileProcessing(fileInput, type) {
+            const file = fileInput.files[0];
+            if (!file) {
+                alert(translations[currentLang].invalidInput);
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                try {
+                    const workbook = XLSX.read(new Uint8Array(event.target.result), { type: 'array' });
+                    const jsonData = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]], { header: 1 });
+                    const samples = (type === 'Lab') ? parseLabSamples(jsonData) : parseRgbSamples(jsonData);
+                    const invalidRows = jsonData.length - samples.length;
+
+                    if (samples.length === 0) {
+                        alert(translations[currentLang].noValidSamples);
+                        return;
+                    }
+
+                    if (invalidRows > 0) {
+                        alert(translations[currentLang].invalidExcelData + (currentLang === 'fa' ? ` (${invalidRows} ردیف نامعتبر)` : ` (${invalidRows} invalid rows)`));
+                    }
+
+                    if (samples.length < 2) {
+                        alert(translations[currentLang].invalidInput + (currentLang === 'fa' ? "فایل باید حداقل شامل دو نمونه معتبر باشد." : "The file must contain at least two valid samples."));
+                        return;
+                    }
+
+                    if (type === 'Lab') labSamples = samples;
+                    else rgbSamples = samples;
+                    runAnalysis(samples, type, false);
+                } catch (error) {
+                    console.error(`Error processing ${type} file:`, error);
+                    alert(translations[currentLang].invalidInput + (currentLang === 'fa' ? "خطایی در خواندن یا پردازش فایل اکسل رخ داد." : "An error occurred while reading or processing the Excel file."));
+                }
+            };
+            reader.readAsArrayBuffer(file);
+        }
+
+        function parseLabSamples(data) {
+            let invalidRows = 0;
+            const samples = data.map(row => {
+                if (!row || row.length < 4) {
+                    invalidRows++;
+                    return null;
+                }
+                const [name, l, a, b] = [String(row[0]).trim(), parseFloat(row[1]), parseFloat(row[2]), parseFloat(row[3])];
+                if (!name || isNaN(l) || isNaN(a) || isNaN(b) || l < 0 || l > 100 || a < -128 || a > 127 || b < -128 || b > 127) {
+                    invalidRows++;
+                    return null;
+                }
+                return { name, lab: { l, a, b, mode: 'lab' } };
+            }).filter(Boolean);
+            return samples;
+        }
+
+        function parseRgbSamples(data) {
+            let invalidRows = 0;
+            const converter = culori.converter('lab');
+            const samples = data.map(row => {
+                if (!row || row.length < 4) {
+                    invalidRows++;
+                    return null;
+                }
+                const [name, r, g, b] = [String(row[0]).trim(), parseFloat(row[1]), parseFloat(row[2]), parseFloat(row[3])];
+                if (!name || isNaN(r) || isNaN(g) || isNaN(b) || !Number.isInteger(r) || !Number.isInteger(g) || !Number.isInteger(b) || r < 0 || r > 255 || g < 0 || g > 255 || b < 0 || b > 255) {
+                    invalidRows++;
+                    return null;
+                }
+                return { name, lab: converter({ mode: 'rgb', r: r / 255, g: g / 255, b: b / 255 }) };
+            }).filter(Boolean);
+            return samples;
+        }
+
+        function runAnalysis(samples, type, isManualInput) {
+            const elements = {
+                resultsDiv: document.getElementById(`results${type}`),
+                matrixContainer: document.getElementById(`matrixContainer${type}`),
+                colorsContainer: document.getElementById(`colorsContainer${type}`),
+                manualSamplesContainer: document.getElementById(`manualSamplesContainer${type}`),
+                showChartBtn: document.getElementById(`showChartBtn${type}`),
+                printBtn: document.getElementById(`printBtn${type}`),
+                exportExcelBtn: document.getElementById(`exportExcelBtn${type}`)
+            };
+            generateManualSamplesTable(samples, elements.manualSamplesContainer, type, isManualInput);
+            generateMatrix(samples, elements.matrixContainer);
+            generateColorSwatches(samples, elements.colorsContainer);
+            const chartData = prepareChartData(samples);
+
+            if (type === 'Lab') labChartData = chartData;
+            else rgbChartData = chartData;
+
+            elements.showChartBtn.disabled = false;
+            elements.printBtn.disabled = false;
+            elements.exportExcelBtn.disabled = false;
+            elements.resultsDiv.style.display = 'block';
+            elements.resultsDiv.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        function generateMatrix(samples, container) {
+            let tableHTML = '<div class="table-container"><table class="table table-bordered table-striped table-hover text-center align-middle"><thead><tr><th> </th>';
+            samples.forEach(sample => { tableHTML += `<th>${sample.name}</th>`; });
+            tableHTML += '</tr></thead><tbody>';
+            samples.forEach((s1) => {
+                tableHTML += `<tr><th>${s1.name}</th>`;
+                samples.forEach((s2) => {
+                    const deltaE = culori.differenceCiede2000()(s1.lab, s2.lab);
+                    tableHTML += `<td>${Number(deltaE).toFixed(2)}</td>`;
+                });
+                tableHTML += '</tr>';
+            });
+            container.innerHTML = tableHTML + '</tbody></table></div>';
+        }
+
+        function generateColorSwatches(samples, container) {
+            container.innerHTML = samples.map(sample => {
+                const rgbColor = culori.formatRgb(sample.lab);
+                return `
+            <div class="color-item">
+                <div class="color-swatch" style="background-color: ${rgbColor}; background-image: linear-gradient(${rgbColor}, ${rgbColor});"></div>
+                <span>${sample.name}</span>
+            </div>
+        `;
+            }).join('');
+        }
+
+        function prepareChartData(samples) {
+            if (samples.length < 2) return null;
+            const ref = samples[0];
+            return {
+                labels: samples.slice(1).map(s => s.name),
+                data: samples.slice(1).map(s => Number(culori.differenceCiede2000()(ref.lab, s.lab))),
+                referenceName: ref.name
+            };
+        }
+
+        function renderChart(chartData, canvas) {
+            Chart.defaults.font.family = 'vazir';
+            return new Chart(canvas.getContext('2d'), {
+                type: 'line',
+                data: {
+                    labels: chartData.labels,
+                    datasets: [{
+                        label: currentLang === 'fa' ? `ΔE₀₀ نسبت به "${chartData.referenceName}"` : `ΔE₀₀ relative to "${chartData.referenceName}"`,
+                        data: chartData.data,
+                        borderColor: 'var(--accent-green)',
+                        backgroundColor: 'rgba(40, 167, 69, 0.1)',
+                        fill: true,
+                        tension: 0.4,
+                        pointBackgroundColor: 'var(--accent-green)',
+                        pointRadius: 5
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: { title: { display: false }, legend: { labels: { font: { size: 14 } } } },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: { display: true, text: translations[currentLang].matrixTitle.split('(')[0].trim(), font: { size: 14 } }
+                        },
+                        x: { title: { display: true, text: translations[currentLang].tableName, font: { size: 14 } } }
+                    }
+                }
+            });
+        }
+
+        // ==========================================
+        //  بخش جدید: منطق مدیریت و پردازش دوربین زنده
+        // ==========================================
+        let videoStream = null;
+        let cameraInterval = null;
+        let currentLiveColor = { r: 0, g: 0, b: 0 };
+        const hiddenCanvas = document.createElement('canvas');
+        const canvasCtx = hiddenCanvas.getContext('2d', { willReadFrequently: true });
+
+        function switchInputMethod(method) {
+            document.getElementById('methodManualBtn').classList.remove('active');
+            document.getElementById('methodExcelBtn').classList.remove('active');
+            document.getElementById('methodCameraBtn').classList.remove('active');
+            
+            if(method === 'manual') document.getElementById('methodManualBtn').classList.add('active');
+            if(method === 'excel') document.getElementById('methodExcelBtn').classList.add('active');
+            if(method === 'camera') document.getElementById('methodCameraBtn').classList.add('active');
+
+            const manualCards = document.querySelectorAll('.tab-content .card:nth-of-type(1)');
+            const excelCards = document.querySelectorAll('.tab-content .card:nth-of-type(2)');
+
+            if (method === 'manual') {
+                manualCards.forEach(c => c.style.display = 'block');
+                excelCards.forEach(c => c.style.display = 'none');
+                stopCamera();
+            } else if (method === 'excel') {
+                manualCards.forEach(c => c.style.display = 'none');
+                excelCards.forEach(c => c.style.display = 'block');
+                stopCamera();
+            } else if (method === 'camera') {
+                manualCards.forEach(c => c.style.display = 'block');
+                excelCards.forEach(c => c.style.display = 'none');
+                startCamera();
+            }
+        }
+
+        async function startCamera() {
+            stopCamera();
+            document.getElementById('cameraScannerSection').style.display = 'block';
+            
+            const constraints = {
+                video: {
+                    facingMode: 'environment',
+                    width: { ideal: 640 },
+                    height: { ideal: 480 }
+                },
+                audio: false
+            };
+
+            try {
+                videoStream = await navigator.mediaDevices.getUserMedia(constraints);
+                const video = document.getElementById('webcamVideo');
+                video.srcObject = videoStream;
+                video.onloadedmetadata = () => {
+                    cameraInterval = setInterval(processCameraFrame, 100);
+                };
+            } catch (err) {
+                console.error("Error accessing camera: ", err);
+                alert(currentLang === 'fa' ? "خطا در دسترسی به دوربین. لطفاً مجوز دسترسی را بررسی کنید." : "Camera access error. Please check permissions.");
+                switchInputMethod('manual');
+            }
+        }
+
+        function stopCamera() {
+            if (cameraInterval) clearInterval(cameraInterval);
+            if (videoStream) {
+                videoStream.getTracks().forEach(track => track.stop());
+            }
+            videoStream = null;
+            cameraInterval = null;
+            document.getElementById('cameraScannerSection').style.display = 'none';
+        }
+
+        function processCameraFrame() {
+            const video = document.getElementById('webcamVideo');
+            if (!video || video.paused || video.ended) return;
+
+            hiddenCanvas.width = video.videoWidth;
+            hiddenCanvas.height = video.videoHeight;
+            
+            if(hiddenCanvas.width === 0 || hiddenCanvas.height === 0) return;
+
+            canvasCtx.drawImage(video, 0, 0, hiddenCanvas.width, hiddenCanvas.height);
+            const centerX = Math.floor(hiddenCanvas.width / 2);
+            const centerY = Math.floor(hiddenCanvas.height / 2);
+            const pixel = canvasCtx.getImageData(centerX, centerY, 1, 1).data;
+            
+            currentLiveColor = { r: pixel[0], g: pixel[1], b: pixel[2] };
+            const rgbStr = `rgb(${currentLiveColor.r}, ${currentLiveColor.g}, ${currentLiveColor.b})`;
+            document.getElementById('liveColorPreview').style.backgroundColor = rgbStr;
+            
+            const isLabTab = document.getElementById('lab-tab').classList.contains('active');
+            if (isLabTab) {
+                const labColor = culori.converter('lab')({ mode: 'rgb', r: currentLiveColor.r / 255, g: currentLiveColor.g / 255, b: currentLiveColor.b / 255 });
+                document.getElementById('liveColorValues').textContent = `L*: ${labColor.l.toFixed(1)} | a*: ${labColor.a.toFixed(1)} | b*: ${labColor.b.toFixed(1)}`;
+            } else {
+                document.getElementById('liveColorValues').textContent = `R: ${currentLiveColor.r} | G: ${currentLiveColor.g} | B: ${currentLiveColor.b}`;
+            }
+        }
+
+        document.getElementById('captureColorBtn').addEventListener('click', () => {
+            const isLabTab = document.getElementById('lab-tab').classList.contains('active');
+            
+            if (isLabTab) {
+                const labColor = culori.converter('lab')({ mode: 'rgb', r: currentLiveColor.r / 255, g: currentLiveColor.g / 255, b: currentLiveColor.b / 255 });
+                document.getElementById('manualLLab').value = labColor.l.toFixed(2);
+                document.getElementById('manualALab').value = labColor.a.toFixed(2);
+                document.getElementById('manualBLab').value = labColor.b.toFixed(2);
+            } else {
+                document.getElementById('manualRRgb').value = currentLiveColor.r;
+                document.getElementById('manualGRgb').value = currentLiveColor.g;
+                document.getElementById('manualBRgb').value = currentLiveColor.b;
+            }
+        });
+
+        document.getElementById('stopCameraBtn').addEventListener('click', () => {
+            switchInputMethod('manual');
+        });
+
+        document.getElementById('langToggle').addEventListener('click', () => {
+            switchLanguage(currentLang === 'fa' ? 'en' : 'fa');
+        });
+
+        setupAnalyzer('Lab');
+        setupAnalyzer('Rgb');
+
+        setTimeout(() => { switchInputMethod('manual'); }, 300);
+    </script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="js/culori.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="js/bootstrap.bundle.min.js"></script>
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/service-worker.js')
+                    .then(registration => {
+                        console.log('Service Worker: Registration successful');
+                    })
+                    .catch(error => {
+                        console.log('Service Worker: Registration failed: ', error);
+                    });
+            });
+        }
+    </script>
+</body>
+
+</html>
